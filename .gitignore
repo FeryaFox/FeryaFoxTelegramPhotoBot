@@ -126,3 +126,7 @@ dmypy.json
 
 # My bot ignore
 bot.db
+
+# Heroku
+runtime.txt 
+Procfile
