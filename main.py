@@ -37,6 +37,7 @@ def check_photo(m):
     dd = ''
     if '@' in m.text:
 
+
         for i in m.text:
             if i != '@':
                 dd += i
