@@ -34,9 +34,20 @@ markup_admin = ReplyKeyboardMarkup(resize_keyboard=True).row(Keyboard.add_catego
 
 
 def check_photo(m):
-    if len(m.text) > 3:
-        if m.text[0:2] == '/r':
-            s = m['text'].split()[0][3:]
+    dd = ''
+    if '@' in m.text and False:
+
+        for i in m.text:
+            if i != '@':
+                dd += i
+            else:
+                break
+    else:
+        dd = m.text
+
+    if len(dd) > 3:
+        if dd[0:2] == '/r':
+            s = dd.split()[0][3:]
             if s[0] != 'p':
                 return True, False, s
             elif s[0] == 'p':
@@ -88,14 +99,25 @@ async def r(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: check_photo_for_add(message))
 async def add_photo(message: types.Message, state: FSMContext):
-    if len(message.text) == 4:
+    dd = ''
+    if '@' in message.text:
+
+        for i in message.text:
+            if i != '@':
+                dd += i
+            else:
+                break
+    else:
+        dd = message.text
+
+    if len(dd) == 4:
         await bot.send_message(message.chat.id,
                                'Отправь категорию для добавления\n/category_list для полученния списка '
                                'категорий\n/exit для выхода')
         await photo_state.waiting_for_add_photo_type.set()
     else:
         await photo_state.waiting_for_add_photo.set()
-        d = message.text[5:]
+        d = dd[5:]
         await state.update_data(photo_type=d.lower())
         await bot.send_message(message.chat.id, 'Отправь картинку для добавления')
 
@@ -191,9 +213,6 @@ async def add_photo_type(message: types.Message, state: FSMContext):
         await state.update_data(photo_type=message.text.lower())
         await photo_state.waiting_for_count.set()
         await bot.send_message(message.chat.id, 'Пришли количесво для вывода')
-
-
-
 
 
 @dp.message_handler(state=photo_state.waiting_for_photo_type, content_types=types.ContentTypes.TEXT)
