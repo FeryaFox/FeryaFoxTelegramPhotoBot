@@ -92,3 +92,7 @@ class SQLighter:
     def check_category(self, name):
         with self.connection:
             return self.cursor.execute('SELECT * FROM photo WHERE photo_type = ? LIMIT 1', (name,)).fetchall() != []
+
+    def add_admin(self, telegram_id):
+        with self.connection:
+            return self.cursor.execute('INSERT INTO admin (telegram_id) values (?)', (telegram_id,))
