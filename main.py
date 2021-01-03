@@ -34,9 +34,20 @@ markup_admin = ReplyKeyboardMarkup(resize_keyboard=True).row(Keyboard.add_catego
 
 
 def check_photo(m):
-    if len(m.text) > 3:
-        if m.text[0:2] == '/r':
-            s = m['text'].split()[0][3:]
+    dd = ''
+    if '@' in m.text and False:
+
+        for i in m.text:
+            if i != '@':
+                dd += i
+            else:
+                break
+    else:
+        dd = m.text
+
+    if len(dd) > 3:
+        if dd[0:2] == '/r':
+            s = dd.split()[0][3:]
             if s[0] != 'p':
                 return True, False, s
             elif s[0] == 'p':
@@ -88,14 +99,25 @@ async def r(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: check_photo_for_add(message))
 async def add_photo(message: types.Message, state: FSMContext):
-    if len(message.text) == 4:
+    dd = ''
+    if '@' in message.text:
+
+        for i in message.text:
+            if i != '@':
+                dd += i
+            else:
+                break
+    else:
+        dd = message.text
+
+    if len(dd) == 4:
         await bot.send_message(message.chat.id,
                                'Отправь категорию для добавления\n/category_list для полученния списка '
                                'категорий\n/exit для выхода')
         await photo_state.waiting_for_add_photo_type.set()
     else:
         await photo_state.waiting_for_add_photo.set()
-        d = message.text[5:]
+        d = dd[5:]
         await state.update_data(photo_type=d.lower())
         await bot.send_message(message.chat.id, 'Отправь картинку для добавления')
 
@@ -266,7 +288,7 @@ async def waiting_for_command(message: types.Message, state: FSMContext):
     if 'Добавить категорию' == message.text:
         await admin_menu.waiting_for_add_category.set()
         markup = ReplyKeyboardMarkup(resize_keyboard=True).row(Keyboard.category_list, Keyboard.exit_admin)
-        await bot.send_message(message.from_user.id, 'Пришли название для новой категории', reply_markup=markup)
+        await bot.send_message(message.from_user.id, 'Пришли название для новой категории //название не может содержать @', reply_markup=markup)
     elif 'Выйти из админки' == message.text:
         await state.finish()
         await bot.send_message(message.chat.id, f'Прощай {message.from_user.first_name}',
