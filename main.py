@@ -35,7 +35,7 @@ markup_admin = ReplyKeyboardMarkup(resize_keyboard=True).row(Keyboard.add_catego
 
 def check_photo(m):
     dd = ''
-    if '@' in m.text and False:
+    if '@' in m.text:
 
         for i in m.text:
             if i != '@':
