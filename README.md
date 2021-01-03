@@ -1,6 +1,9 @@
 # FeryaFoxTelegramPhotoBot
+Данная ветка - это ветка для запуска на Heroku
+
 FeryaFoxTelegramPhotoBot - это телеграм бот для случайных картинок, которые добавляют пользователи
 Установка:
+
 1. Установите Python https://www.python.org/
 2. Устанновите зависимости 
 `pip install -r requirements.txt`
