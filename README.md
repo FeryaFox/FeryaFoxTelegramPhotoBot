@@ -1,5 +1,4 @@
 # FeryaFoxTelegramPhotoBot
-Данная ветка - это ветка для запуска на Heroku
 
 FeryaFoxTelegramPhotoBot - это телеграм бот для случайных картинок, которые добавляют пользователи
 Установка:

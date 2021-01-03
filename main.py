@@ -35,12 +35,7 @@ markup_admin = ReplyKeyboardMarkup(resize_keyboard=True).row(Keyboard.add_catego
 
 def check_photo(m):
     dd = ''
-<<<<<<<<< Temporary merge branch 1
-    if '@' in m.text and False:
-=========
     if '@' in m.text:
->>>>>>>>> Temporary merge branch 2
-
         for i in m.text:
             if i != '@':
                 dd += i
