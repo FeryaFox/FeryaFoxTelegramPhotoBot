@@ -193,9 +193,6 @@ async def add_photo_type(message: types.Message, state: FSMContext):
         await bot.send_message(message.chat.id, 'Пришли количесво для вывода')
 
 
-
-
-
 @dp.message_handler(state=photo_state.waiting_for_photo_type, content_types=types.ContentTypes.TEXT)
 async def photo_type_2(message: types.Message, state: FSMContext):
     if message.text == '/category_list':
