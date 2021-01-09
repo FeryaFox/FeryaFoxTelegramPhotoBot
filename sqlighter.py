@@ -1,12 +1,13 @@
+import os
 import psycopg2
 import datetime
 
 class SQLighter:
 
     def __init__(self, database):
-        #DATABASE_URL = os.environ['DATABASE_URL']
-        #self.connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-        self.connection = psycopg2.connect(user='postgres', host='localhost', port=5432)
+        DATABASE_URL = os.environ['DATABASE_URL']
+        self.connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+        #self.connection = psycopg2.connect(user='postgres', host='localhost', port=5432)
 
         self.cursor = self.connection.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS "admin" ("telegram_id"	INTEGER);')
