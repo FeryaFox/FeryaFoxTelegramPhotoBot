@@ -1,21 +1,26 @@
-import sqlite3
-
+import os
+import psycopg2
+import datetime
 
 class SQLighter:
 
     def __init__(self, database):
-        self.connection = sqlite3.connect(database)
+        #DATABASE_URL = os.environ['DATABASE_URL']
+        #self.connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+        self.connection = psycopg2.connect(user='postgres', host='localhost', port=5432)
+
         self.cursor = self.connection.cursor()
         self.cursor.execute('CREATE TABLE IF NOT EXISTS "admin" ("telegram_id"	INTEGER);')
-        self.cursor.execute('CREATE TABLE IF NOT EXISTS "category"(name STRING,description STRING)')
+        self.cursor.execute('CREATE TABLE IF NOT EXISTS "category" (name TEXT, description TEXT)')
         self.cursor.execute('CREATE TABLE IF NOT EXISTS "photo"(telegram_id INTEGER,photo_time INTEGER,file_id TEXT,photo_type TEXT)')
-        self.cursor.execute('CREATE TABLE IF NOT EXISTS "user"(telegram_id INTEGER,username TEXT,first_name TEXT,last_name TEXT)')
+        self.cursor.execute('CREATE TABLE IF NOT EXISTS "user_telegram" (telegram_id INTEGER,username TEXT,first_name TEXT,last_name TEXT)')
 
     def user_exists(self, message):
         """Проверяем, есть ли уже юзер в базе"""
         with self.connection:
-            result = self.cursor.execute('SELECT * FROM user WHERE `telegram_id` = ?',
-                                         (message['from']['id'],)).fetchall()
+            self.cursor.execute('SELECT * FROM user_telegram WHERE telegram_id = %s',
+                                (message['from']['id'],))
+            result = self.cursor.fetchall()
             return bool(len(result))
 
     def add_user(self, message):
@@ -24,15 +29,15 @@ class SQLighter:
             data_tuple = (message['from']['id'], message['from']['username'], message['from']['first_name'],
                           message['from']['last_name'])
             return self.cursor.execute(
-                "INSERT INTO user (telegram_id, username, first_name,  last_name) VALUES (?, ?, ?, ?)",
+                "INSERT INTO user_telegram (telegram_id, username, first_name,  last_name) VALUES (%s, %s, %s, %s)",
                 data_tuple)
 
     def update_user(self, message):
         with self.connection:
             return self.cursor.execute(
-                "UPDATE user SET `username` = ?, first_name = ?, last_name = ? WHERE `telegram_id` = ?", (
+                "UPDATE user_telegram SET username = %s, first_name = %s, last_name = %s WHERE telegram_id = %s", (
                     message['from']['username'], message['from']['first_name'], message['from']['last_name'],
-                    message['from']['id']))
+                    message['from']['id'],))
 
     def check_user(self, message):
         if not self.user_exists(message):
@@ -45,15 +50,17 @@ class SQLighter:
     def add_picture(self, message, photo_type):
         self.check_user(message)
         with self.connection:
-            self.cursor.execute('insert into photo (telegram_id, photo_time, file_id, photo_type) values (?, ?, ?, ?)',
+            time = int(datetime.datetime.strptime('2019-12-24 04:00:00', '%Y-%m-%d %H:%M:%S').timestamp())
+
+            self.cursor.execute('insert into photo (telegram_id, photo_time, file_id, photo_type) values (%s, %s, %s, %s)',
                                 (message['from']['id'],
-                                 message['date'],
+                                 time,
                                  message['photo'][-1]['file_id'],
                                  photo_type,))
 
     def add_picture_typo(self, author_id, time_a, id_photo, photo_type):
         with self.connection:
-            self.cursor.execute('insert into photo (telegram_id, photo_time, file_id, photo_type) values (?, ?, ?, ?)',
+            self.cursor.execute('insert into photo (telegram_id, photo_time, file_id, photo_type) values (%s, %s, %s, %s)',
                                 (author_id,
                                  time_a,
                                  id_photo,
@@ -62,15 +69,15 @@ class SQLighter:
     def get_random_picture(self, type_photo, count):
         with self.connection:
             print(type_photo,count)
-            sql_fetch_blob_query = f"""SELECT * FROM photo WHERE photo_type = ? and file_id IS NOT NULL ORDER BY 
+            sql_fetch_blob_query = f"""SELECT * FROM photo WHERE photo_type = %s and file_id IS NOT NULL ORDER BY 
             random() LIMIT {count}; """
-            r = self.cursor.execute(sql_fetch_blob_query, (type_photo,)).fetchall()
-            return r
+            self.cursor.execute(sql_fetch_blob_query, (type_photo,))
+            return self.cursor.fetchall()
 
     def check_admin(self, message):
         with self.connection:
-
-            data = self.cursor.execute("SELECT * FROM admin WHERE telegram_id = ?", (message['from']['id'],)).fetchall()
+            self.cursor.execute("SELECT * FROM admin WHERE telegram_id = %s", (message['from']['id'],))
+            data = self.cursor.fetchall()
 
         if data:
             return True
@@ -79,20 +86,23 @@ class SQLighter:
 
     def get_category(self):
         with self.connection:
-            return self.cursor.execute('SELECT * FROM category').fetchall()
+            self.cursor.execute('SELECT * FROM category')
+            return self.cursor.fetchall()
 
     def add_category(self, name, des):
         with self.connection:
-            self.cursor.execute('INSERT INTO category (name, description) values (?, ?)', (name, des))
+            self.cursor.execute('INSERT INTO category (name, description) values (%s, %s)', (name, des))
 
     def get_all(self):
         with self.connection:
-            return self.cursor.execute('SELECT * FROM a_art').fetchall()
+            self.cursor.execute('SELECT * FROM a_art')
+            return self.cursor.fetchall()
 
     def check_category(self, name):
         with self.connection:
-            return self.cursor.execute('SELECT * FROM photo WHERE photo_type = ? LIMIT 1', (name,)).fetchall() != []
+            self.cursor.execute('SELECT * FROM photo WHERE photo_type = %s LIMIT 1', (name,))
+            return self.cursor.fetchall() != []
 
     def add_admin(self, telegram_id):
         with self.connection:
-            return self.cursor.execute('INSERT INTO admin (telegram_id) values (?)', (telegram_id,))
+            return self.cursor.execute('INSERT INTO admin (telegram_id) values (%s)', (telegram_id,))

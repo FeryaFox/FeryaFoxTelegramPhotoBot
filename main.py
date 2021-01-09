@@ -117,9 +117,11 @@ async def add_photo(message: types.Message, state: FSMContext):
         await photo_state.waiting_for_add_photo_type.set()
     else:
         await photo_state.waiting_for_add_photo.set()
+
         d = dd[5:]
+        print(d)
         await state.update_data(photo_type=d.lower())
-        await bot.send_message(message.chat.id, 'Отправь картинку для добавления')
+        await bot.send_message(message.chat.id, f'Отправь картинку для добавления в категорию {d.lower()}')
 
 
 @dp.message_handler(state=photo_state.waiting_for_add_photo_type, content_types=types.ContentTypes.TEXT)
@@ -247,11 +249,10 @@ async def add_photo_text(message: types.Message, state: FSMContext):
 @dp.message_handler(state=photo_state.waiting_for_add_photo, content_types=types.ContentTypes.PHOTO)
 async def add_photo_2(message: types.Message, state: FSMContext):
     d = await state.get_data()
-
-    #db.add_picture(message, d['photo_type'])
-    #await message.reply('Добавил отправь ещё или /exit для выхода')
-    await add_photo_state.waiting_for_photo_id.set()
-    await state.update_data(file_id=message['photo'][-1]['file_id'])
+    db.add_picture(message, d['photo_type'])
+    await message.reply('Добавил отправь ещё или /exit для выхода')
+    #await add_photo_state.waiting_for_photo_id.set()
+    #await state.update_data(file_id=message['photo'][-1]['file_id'])
 
 
 @dp.message_handler(state=add_photo_state.waiting_for_photo_id, content_types=types.ContentTypes.TEXT)

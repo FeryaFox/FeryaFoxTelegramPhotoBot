@@ -10,3 +10,4 @@ multidict==5.1.0
 pytz==2020.5
 typing-extensions==3.7.4.3
 yarl==1.6.3
+psycopg2-binary==2.8.6
