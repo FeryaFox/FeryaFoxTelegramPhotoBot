@@ -2,8 +2,10 @@ import sqlite3
 import psycopg2
 import os
 
-DATABASE_URL = '127.0.0.1'
-con_p = psycopg2.connect(user='postgres', host='localhost', port=5432)
+#DATABASE_URL = '127.0.0.1'
+#con_p = psycopg2.connect(user='postgres', host='localhost', port=5432)
+DATABASE_URL = os.environ['DATABASE_URL']
+con_p = psycopg2.connect(DATABASE_URL, sslmode='require')
 cursor_p = con_p.cursor()
 
 connection = sqlite3.connect('bot.db')
