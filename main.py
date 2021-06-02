@@ -369,7 +369,7 @@ async def category_list(message: types.Message):
     to_send = 'Список категорий\n'
     for i in list_cat:
         to_send += f'{i[0]} - {i[1]}\n'
-    await bot.send_message(message.from_user.id, to_send)
+    await bot.send_message(message.chat.id, to_send)
 
 
 if __name__ == "__main__":
