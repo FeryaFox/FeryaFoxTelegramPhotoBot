@@ -36,7 +36,6 @@ markup_admin = ReplyKeyboardMarkup(resize_keyboard=True).row(Keyboard.add_catego
 def check_photo(m):
     dd = ''
     if '@' in m.text:
-
         for i in m.text:
             if i != '@':
                 dd += i
@@ -289,7 +288,7 @@ async def waiting_for_command(message: types.Message, state: FSMContext):
     if 'Добавить категорию' == message.text:
         await admin_menu.waiting_for_add_category.set()
         markup = ReplyKeyboardMarkup(resize_keyboard=True).row(Keyboard.category_list, Keyboard.exit_admin)
-        await bot.send_message(message.from_user.id, 'Пришли название для новой категории', reply_markup=markup)
+        await bot.send_message(message.from_user.id, 'Пришли название для новой категории //название не может содержать @', reply_markup=markup)
     elif 'Выйти из админки' == message.text:
         await state.finish()
         await bot.send_message(message.chat.id, f'Прощай {message.from_user.first_name}',
