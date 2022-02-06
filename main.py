@@ -2,19 +2,22 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
-import config
 import logging
 from sqlighter import SQLighter
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InputMediaPhoto
 
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 logging.basicConfig(level=logging.INFO)
 
 memory_storage = MemoryStorage()
 
-bot = Bot(token=config.TOKEN)
+bot = Bot(token=os.environ['TOKEN'])
 dp = Dispatcher(bot, storage=memory_storage)
-db = SQLighter('bot.db')
+db = SQLighter()
 
 
 class Keyboard:
@@ -118,7 +121,6 @@ async def add_photo(message: types.Message, state: FSMContext):
         await photo_state.waiting_for_add_photo.set()
 
         d = dd[5:]
-        print(d)
         await state.update_data(photo_type=d.lower())
         await bot.send_message(message.chat.id, f'Отправь картинку для добавления в категорию {d.lower()}')
 
@@ -256,14 +258,12 @@ async def add_photo_2(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=add_photo_state.waiting_for_photo_id, content_types=types.ContentTypes.TEXT)
 async def add_photo_3(message: types.Message, state: FSMContext):
-    print('d')
     await state.update_data(id=message.text)
     await add_photo_state.waiting_for_photo_time.set()
 
 
 @dp.message_handler(state=add_photo_state.waiting_for_photo_time, content_types=types.ContentTypes.TEXT)
 async def add_photo_4(message: types.Message, state: FSMContext):
-    print('dfd')
     date = await state.get_data()
     db.add_picture_typo(date['id'], message.text, date['file_id'], 'a_art')
     await photo_state.waiting_for_add_photo.set()
@@ -365,10 +365,20 @@ async def exit_from_all(message: types.Message, state: FSMContext):
 @dp.message_handler(commands='category_list')
 async def category_list(message: types.Message):
     list_cat = db.get_category()
-    to_send = 'Список категорий\n'
-    for i in list_cat:
-        to_send += f'{i[0]} - {i[1]}\n'
-    await bot.send_message(message.chat.id, to_send)
+
+    if not list_cat:
+        await bot.send_message(message.chat.id, "Список категорий пуст")
+    else:
+        to_send = 'Список категорий\n'
+        for i in list_cat:
+            to_send += f'{i[0]} - {i[1]}\n'
+        await bot.send_message(message.chat.id, to_send)
+
+@dp.message_handler(commands="start")
+async def start(message: types.Message):
+
+    db.add_user(message)
+    await bot.send_message(message.chat.id, 'Добро пожаловать в бота для случайных картинок')
 
 
 if __name__ == "__main__":

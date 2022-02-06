@@ -130,3 +130,5 @@ bot.db
 # Heroku
 runtime.txt 
 Procfile
+
+/.idea
