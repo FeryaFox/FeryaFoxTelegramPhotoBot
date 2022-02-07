@@ -8,7 +8,7 @@ DATABASE_URL = os.environ['DATABASE_URL']
 con_p = psycopg2.connect(DATABASE_URL, sslmode='require')
 cursor_p = con_p.cursor()
 
-connection = sqlite3.connect('bot.db')
+connection = sqlite3.connect('../bot.db')
 cursor_sql = connection.cursor()
 
 '''
